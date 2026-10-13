@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { nanoid } from 'nanoid';
 import { quizStore, blankQuestion } from '../store/quizStore.js';
 import type { Question, Quiz } from '../types.js';
@@ -27,7 +27,7 @@ function sanitizeQuestions(input: unknown): Question[] {
   });
 }
 
-quizRouter.get('/', (_req, res) => {
+quizRouter.get('/', (_req: Request, res: Response) => {
   res.json(
     quizStore.all().map((q) => ({
       id: q.id,
@@ -42,13 +42,13 @@ quizRouter.get('/', (_req, res) => {
   );
 });
 
-quizRouter.get('/:id', (req, res) => {
+quizRouter.get('/:id', (req: Request, res: Response) => {
   const quiz = quizStore.get(req.params.id);
   if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
   res.json(quiz);
 });
 
-quizRouter.post('/', (req, res) => {
+quizRouter.post('/', (req: Request, res: Response) => {
   const body = req.body as Partial<Quiz>;
   const quiz = quizStore.create({
     title: body.title,
@@ -59,7 +59,7 @@ quizRouter.post('/', (req, res) => {
   res.status(201).json(quiz);
 });
 
-quizRouter.put('/:id', (req, res) => {
+quizRouter.put('/:id', (req: Request, res: Response) => {
   const body = req.body as Partial<Quiz>;
   const quiz = quizStore.update(req.params.id, {
     title: String(body.title ?? '').slice(0, 120) || 'Untitled quiz',
@@ -71,13 +71,13 @@ quizRouter.put('/:id', (req, res) => {
   res.json(quiz);
 });
 
-quizRouter.post('/:id/duplicate', (req, res) => {
+quizRouter.post('/:id/duplicate', (req: Request, res: Response) => {
   const quiz = quizStore.duplicate(req.params.id);
   if (!quiz) return res.status(404).json({ error: 'Quiz not found' });
   res.status(201).json(quiz);
 });
 
-quizRouter.delete('/:id', (req, res) => {
+quizRouter.delete('/:id', (req: Request, res: Response) => {
   if (!quizStore.remove(req.params.id))
     return res.status(404).json({ error: 'Quiz not found' });
   res.status(204).end();

@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    --surface-1: #ffffff;
+    --text-primary: #14140f;
+    --text-secondary: #52514e;
+    --text-muted: #86857f;
+    /* Categorical slots — validated CVD-safe on a light surface. */
+    --series-1: #2a78d6;
+    --series-2: #eb6834;
+    --series-3: #1baf7a;
+    --series-4: #4a3aa7;
+  }
+
+  html, body, #root { height: 100%; }
+
+  body {
+    @apply bg-page text-ink font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+
+  /* Visible keyboard focus everywhere, never removed. */
+  :focus-visible {
+    outline: 2px solid theme('colors.brand.500');
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection { background: theme('colors.brand.100'); }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-semibold
+           transition-all duration-150 disabled:opacity-40 disabled:pointer-events-none
+           select-none whitespace-nowrap;
+  }
+  .btn-primary {
+    @apply btn bg-brand-500 text-white hover:bg-brand-600 active:scale-[.98]
+           shadow-[0_1px_2px_rgba(20,20,15,.12)];
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-ink-soft hover:bg-sunken hover:text-ink active:scale-[.98];
+  }
+  .btn-outline {
+    @apply btn border border-line bg-surface text-ink hover:border-ink-mute
+           hover:bg-sunken/50 active:scale-[.98];
+  }
+  .btn-danger {
+    @apply btn bg-wrong/10 text-wrong hover:bg-wrong/20 active:scale-[.98];
+  }
+  .btn-lg { @apply h-12 px-6 text-[15px]; }
+  .btn-md { @apply h-10 px-5 text-sm; }
+  .btn-sm { @apply h-8 px-3.5 text-[13px]; }
+
+  .card {
+    @apply rounded-2xl border border-line bg-surface shadow-card;
+  }
+
+  .field {
+    @apply w-full rounded-xl border border-line bg-surface px-4 text-[15px] text-ink
+           placeholder:text-ink-mute transition-colors
+           focus:border-brand-500 focus:outline-none focus:ring-4 focus:ring-brand-500/10;
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full bg-sunken px-2.5 py-1
+           text-xs font-semibold text-ink-soft;
+  }
+
+  .label {
+    @apply block text-xs font-bold uppercase tracking-[.08em] text-ink-mute;
+  }
+}
+
+/* Honour the OS reduced-motion setting rather than animating regardless. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* Hide scrollbars on the presentation surface without disabling scroll. */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }

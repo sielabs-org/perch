@@ -60,9 +60,28 @@ export default function Dashboard() {
       <header className="border-b border-line bg-surface">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-5 py-4">
           <Logo />
-          <Link to="/play" className="btn-ghost btn-md">
-            Join as player
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link to="/play" className="btn-ghost btn-md">
+              Join as player
+            </Link>
+            {sessionStorage.getItem('perch_user') && (
+              <div className="flex items-center gap-2 border-l border-line pl-3">
+                <span className="rounded-full bg-brand-50 px-2.5 py-1 text-xs font-semibold text-brand-600">
+                  {sessionStorage.getItem('perch_user')}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    sessionStorage.removeItem('perch_user');
+                    navigate('/');
+                  }}
+                  className="btn-ghost btn-sm text-xs text-ink-soft hover:text-wrong"
+                >
+                  Log out
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 

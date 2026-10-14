@@ -11,6 +11,7 @@ import { Banner, PageLoader } from '../components/ui';
 import { emit, getSocket } from '../lib/socket';
 import { useCountdown } from '../lib/hooks';
 import { optionColor } from '../lib/palette';
+import { getPlayerEmoji } from '../lib/avatar';
 import type { HostState } from '../lib/types';
 
 export default function Present() {
@@ -175,70 +176,106 @@ export default function Present() {
 
 function Lobby({ state, onStart }: { state: HostState; onStart: () => void }) {
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.1fr_.9fr]">
-      <section className="animate-fade-up">
-        <h1 className="font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
-          {state.quiz.emoji} {state.quiz.title}
-        </h1>
-        <p className="mt-3 text-lg text-ink-soft">
-          {state.total} {state.total === 1 ? 'question' : 'questions'} · join from any phone
-        </p>
-
-        <div className="mt-7">
-          <JoinPanel code={state.code} />
+    <div className="grid gap-8 lg:grid-cols-[1fr_360px] xl:grid-cols-[1fr_390px] items-start">
+      {/* Center: Main Waiting Room Stage */}
+      <section className="flex flex-col gap-4 animate-fade-up">
+        <div>
+          <h1 className="font-display text-lg font-bold text-ink sm:text-xl">
+            <span className="mr-1.5 inline-block text-xl">{state.quiz.emoji}</span>
+            {state.quiz.title}
+          </h1>
+          <p className="mt-0.5 text-xs text-ink-soft">
+            {state.total} {state.total === 1 ? 'question' : 'questions'} · join from any phone
+          </p>
         </div>
 
-        <button
-          className="btn-primary btn-lg mt-7 w-full sm:w-auto"
-          onClick={onStart}
-          disabled={state.playerCount === 0}
-        >
-          {state.playerCount === 0
-            ? 'Waiting for the first player…'
-            : `Start quiz with ${state.playerCount} ${state.playerCount === 1 ? 'player' : 'players'}`}
-        </button>
-        <p className="mt-2 text-xs text-ink-mute">
-          Tip: press <kbd className="rounded border border-line bg-sunken px-1.5 py-0.5 font-mono text-[11px]">Space</kbd> to advance at any point.
-        </p>
-      </section>
-
-      <section className="card flex flex-col p-5">
-        <div className="flex items-baseline justify-between">
-          <h2 className="font-display text-lg font-extrabold text-ink">In the room</h2>
-          <span className="font-display text-3xl font-extrabold tabular-nums text-brand-500">
-            {state.playerCount}
-          </span>
-        </div>
-
-        {state.players.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-2 py-14 text-center">
-            <span className="animate-float text-4xl" aria-hidden="true">👀</span>
-            <p className="text-sm font-medium text-ink-soft">Nobody has joined yet.</p>
-            <p className="max-w-[22ch] text-xs text-ink-mute">
-              Names appear here the moment someone enters the code.
-            </p>
+        {/* Floating Player Stage Arena */}
+        <div className="card relative flex flex-col p-6 sm:p-7 min-h-[380px] lg:min-h-[440px] bg-gradient-to-b from-surface via-surface to-page/50 border border-line overflow-hidden shadow-card">
+          {/* Header of Stage */}
+          <div className="flex items-center justify-between border-b border-line/70 pb-4">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-3 w-3 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500" />
+              </span>
+              <h2 className="font-display text-lg sm:text-xl font-bold text-ink">
+                In the room
+              </h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-ink-mute">Players ready</span>
+              <span className="font-display text-3xl font-black tabular-nums text-brand-500">
+                {state.playerCount}
+              </span>
+            </div>
           </div>
-        ) : (
-          <ul className="mt-4 flex flex-wrap gap-2 overflow-y-auto">
-            {state.players.map((p) => (
-              <li
-                key={p.id}
-                className="group flex animate-pop-in items-center gap-1.5 rounded-full border border-line bg-sunken/60 py-1.5 pl-3 pr-2 text-sm font-semibold text-ink"
-              >
-                {p.name}
-                <button
-                  onClick={() => emit('host:kick', { playerId: p.id }).catch(() => {})}
-                  className="grid h-4 w-4 place-items-center rounded-full text-ink-mute opacity-0 transition-opacity hover:bg-wrong hover:text-white focus:opacity-100 group-hover:opacity-100"
-                  aria-label={`Remove ${p.name}`}
-                  title={`Remove ${p.name}`}
-                >
-                  ×
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+
+          {/* Floating Players Area */}
+          {state.players.length === 0 ? (
+            <div className="flex flex-1 flex-col items-center justify-center gap-3 py-16 text-center">
+              <span className="animate-float text-5xl select-none" aria-hidden="true">🎉</span>
+              <h3 className="font-display text-lg font-bold text-ink">Waiting for players to join…</h3>
+              <p className="max-w-[30ch] text-xs sm:text-sm text-ink-mute leading-relaxed">
+                Scan the QR code or enter the code on the right from your phone.
+              </p>
+            </div>
+          ) : (
+            <div className="relative flex-1 py-6 flex flex-wrap content-start items-center gap-3.5 sm:gap-4 overflow-y-auto no-scrollbar">
+              {state.players.map((p, idx) => {
+                const emoji = getPlayerEmoji(p.id, p.name);
+                const isEven = idx % 2 === 0;
+                return (
+                  <div
+                    key={p.id}
+                    className={`group relative flex items-center gap-2.5 rounded-2xl border border-line/90 bg-surface/95 px-4 py-2 shadow-sm backdrop-blur-xs transition-transform hover:scale-105 ${
+                      isEven ? 'animate-float-gentle' : 'animate-float-reverse'
+                    }`}
+                    style={{
+                      animationDelay: `${(idx * 0.35) % 2}s`,
+                    }}
+                  >
+                    <span className="text-2xl sm:text-3xl select-none filter drop-shadow-xs" aria-hidden="true">
+                      {emoji}
+                    </span>
+                    <span className="font-display text-sm sm:text-base font-bold text-ink">
+                      {p.name}
+                    </span>
+                    <button
+                      onClick={() => emit('host:kick', { playerId: p.id }).catch(() => {})}
+                      className="ml-1 grid h-5 w-5 place-items-center rounded-full text-ink-mute opacity-0 transition-opacity hover:bg-wrong hover:text-white focus:opacity-100 group-hover:opacity-100"
+                      aria-label={`Remove ${p.name}`}
+                      title={`Remove ${p.name}`}
+                    >
+                      ×
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Start Button & Shortcuts */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+          <button
+            className="btn-primary btn-lg px-8 text-base font-bold shadow-md shadow-brand-500/20"
+            onClick={onStart}
+            disabled={state.playerCount === 0}
+          >
+            {state.playerCount === 0
+              ? 'Waiting for players…'
+              : `Start quiz with ${state.playerCount} ${state.playerCount === 1 ? 'player' : 'players'} →`}
+          </button>
+          <p className="text-xs text-ink-mute">
+            Tip: press <kbd className="rounded border border-line bg-sunken px-2 py-0.5 font-mono text-xs font-semibold text-ink">Space</kbd> to advance at any point.
+          </p>
+        </div>
       </section>
+
+      {/* Right: Scanner & Join Link */}
+      <aside className="w-full shrink-0 animate-fade-up [animation-delay:100ms]">
+        <JoinPanel code={state.code} vertical />
+      </aside>
     </div>
   );
 }

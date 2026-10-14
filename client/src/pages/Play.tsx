@@ -9,6 +9,7 @@ import { Banner, Spinner } from '../components/ui';
 import { emit, getSocket } from '../lib/socket';
 import { useAnimatedNumber, useCountdown, useLocalStorage } from '../lib/hooks';
 import { optionColor } from '../lib/palette';
+import { getPlayerEmoji } from '../lib/avatar';
 import type { PlayerState } from '../lib/types';
 
 export default function Play() {
@@ -211,7 +212,10 @@ function Game({ state }: { state: PlayerState }) {
         <div className="mx-auto flex max-w-md items-center gap-3">
           {state.me && state.me.rank > 0 && <RankBadge rank={state.me.rank} size="sm" />}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-bold leading-tight text-ink">{state.me?.name}</p>
+            <div className="flex items-center gap-1.5 truncate">
+              <span className="text-base select-none">{getPlayerEmoji(state.me?.id || '', state.me?.name || '')}</span>
+              <p className="truncate text-sm font-bold leading-tight text-ink">{state.me?.name}</p>
+            </div>
             <p className="text-xs text-ink-mute">
               {state.index >= 0 ? `Question ${state.index + 1} of ${state.total}` : 'Waiting room'}
             </p>
@@ -238,14 +242,21 @@ function Game({ state }: { state: PlayerState }) {
 }
 
 function PlayerLobby({ state }: { state: PlayerState }) {
+  const emoji = getPlayerEmoji(state.me?.id || '', state.me?.name || '');
   return (
     <div className="card animate-fade-up p-7 text-center">
-      <span className="block animate-float text-5xl" aria-hidden="true">{state.quiz.emoji}</span>
-      <h1 className="mt-4 font-display text-2xl font-extrabold leading-tight text-ink">
+      {/* Player avatar badge with assigned emoji */}
+      <div className="inline-flex items-center gap-2.5 rounded-full border border-line bg-surface px-4 py-2 mb-5 shadow-xs">
+        <span className="text-3xl animate-bounce" aria-hidden="true">{emoji}</span>
+        <span className="font-display text-base font-bold text-ink">{state.me?.name}</span>
+      </div>
+
+      <span className="block animate-float text-4xl" aria-hidden="true">{state.quiz.emoji}</span>
+      <h1 className="mt-3 font-display text-2xl font-extrabold leading-tight text-ink">
         {state.quiz.title}
       </h1>
       <p className="mt-2 text-sm text-ink-soft">
-        You’re in. Keep this screen open — the quiz starts when the host says so.
+        You’re in! Watch the big screen — the quiz starts when the host begins.
       </p>
       <div className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-sunken/70 py-3">
         <span className="font-display text-2xl font-extrabold tabular-nums text-brand-500">

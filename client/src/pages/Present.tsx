@@ -5,7 +5,7 @@ import { JoinPanel } from '../components/JoinPanel';
 import { OptionShape } from '../components/OptionShape';
 import { ResultsChart, type ResultBar } from '../components/ResultsChart';
 import { Leaderboard } from '../components/Leaderboard';
-import { Podium } from '../components/Podium';
+import { CelebrationFinale } from '../components/CelebrationFinale';
 import { TimerRing } from '../components/TimerRing';
 import { Banner, PageLoader } from '../components/ui';
 import { emit, getSocket } from '../lib/socket';
@@ -411,40 +411,5 @@ function LeaderboardStage({ state }: { state: HostState }) {
 }
 
 function PodiumStage({ state }: { state: HostState }) {
-  return (
-    <div className="mx-auto max-w-4xl text-center">
-      <p className="label">{state.quiz.title}</p>
-      <h1 className="mt-2 font-display text-4xl font-extrabold tracking-tight text-ink sm:text-5xl">
-        🎉 That’s a wrap!
-      </h1>
-
-      <div className="mt-10">
-        <Podium rows={state.leaderboard} />
-      </div>
-
-      <dl className="mx-auto mt-10 grid max-w-xl grid-cols-3 gap-4">
-        {[
-          [state.stats.players, 'players'],
-          [state.stats.questions, 'questions'],
-          [`${state.stats.accuracy}%`, 'answered correctly'],
-        ].map(([big, small]) => (
-          <div key={small as string} className="card p-4">
-            <dt className="font-display text-2xl font-extrabold tabular-nums text-ink">{big}</dt>
-            <dd className="mt-0.5 text-xs text-ink-mute">{small}</dd>
-          </div>
-        ))}
-      </dl>
-
-      {state.leaderboard.length > 3 && (
-        <div className="card mx-auto mt-8 max-w-xl p-5 text-left">
-          <h2 className="label mb-3">Full standings</h2>
-          <Leaderboard rows={state.leaderboard} limit={20} showGain={false} />
-        </div>
-      )}
-
-      <Link to="/dashboard" className="btn-outline btn-lg mt-8">
-        Back to dashboard
-      </Link>
-    </div>
-  );
+  return <CelebrationFinale state={state} />;
 }

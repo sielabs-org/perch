@@ -114,7 +114,7 @@ export class Session {
     }
   }
 
-  /** Begin the countdown that precedes the next question. */
+  /** Open the next question immediately. */
   startNextQuestion() {
     this.clearTimer();
     if (this.index >= this.quiz.questions.length - 1) {
@@ -122,13 +122,10 @@ export class Session {
       return;
     }
     this.index += 1;
-    this.phase = 'countdown';
     this.previousRanks = new Map(
       this.leaderboard().map((row) => [row.id, row.rank]),
     );
-    this.questionEndsAt = Date.now() + COUNTDOWN_MS;
-    this.touch();
-    this.timer = setTimeout(() => this.openQuestion(), COUNTDOWN_MS);
+    this.openQuestion();
   }
 
   private openQuestion() {
@@ -222,12 +219,6 @@ export class Session {
     const correct = !!q.options.find((o) => o.id === optionId)?.correct;
     bucket.set(playerId, { optionId, elapsedMs, correct, points: 0 });
     this.touch();
-
-    // Everyone in has answered -> close early so the room isn't left waiting.
-    const active = [...this.players.values()].filter((p) => p.connected);
-    if (active.length > 0 && active.every((p) => bucket.has(p.id))) {
-      setTimeout(() => this.closeQuestion(), 400);
-    }
     return 'ok';
   }
 

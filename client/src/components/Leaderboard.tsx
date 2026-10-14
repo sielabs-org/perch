@@ -1,5 +1,6 @@
 import type { LeaderRow } from '../lib/types';
 import { MEDAL } from '../lib/palette';
+import { getPlayerEmoji } from '../lib/avatar';
 
 function RankDelta({ delta }: { delta: number }) {
   if (delta === 0) {
@@ -70,18 +71,20 @@ export function Leaderboard({ rows, highlightId, limit = 10, showGain = true }: 
 function LeaderItem({ row, you, index, showGain }: {
   row: LeaderRow; you?: boolean; index: number; showGain: boolean;
 }) {
+  const emoji = getPlayerEmoji(row.id, row.name);
   return (
     <li
-      className={`flex animate-fade-up items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors ${
-        you ? 'border-brand-300 bg-brand-50' : 'border-transparent bg-sunken/60'
+      className={`flex animate-fade-up items-center gap-3 rounded-xl border px-3.5 py-2.5 transition-colors ${
+        you ? 'border-brand-300 bg-brand-50 shadow-xs' : 'border-line/60 bg-surface'
       }`}
       style={{ animationDelay: `${Math.min(index, 10) * 45}ms` }}
     >
       <RankBadge rank={row.rank} />
+      <span className="text-xl sm:text-2xl select-none" aria-hidden="true">{emoji}</span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-semibold text-ink">
+        <p className="truncate text-sm sm:text-base font-bold text-ink">
           {row.name}
-          {you && <span className="ml-1.5 text-xs font-bold text-brand-600">You</span>}
+          {you && <span className="ml-1.5 rounded bg-brand-100 px-1.5 py-0.5 text-[11px] font-bold text-brand-700">You</span>}
         </p>
         <div className="mt-0.5 flex items-center gap-2">
           <RankDelta delta={row.delta} />
@@ -93,7 +96,7 @@ function LeaderItem({ row, you, index, showGain }: {
         </div>
       </div>
       <div className="text-right">
-        <p className="font-display text-base font-extrabold tabular-nums text-ink">
+        <p className="font-display text-base sm:text-lg font-extrabold tabular-nums text-ink">
           {row.score.toLocaleString()}
         </p>
         {showGain && row.gained > 0 && (

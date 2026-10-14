@@ -7,7 +7,14 @@ import { useEffect, useRef, useState } from 'react';
  */
 export function useCountdown(endsAt: number, serverNow: number) {
   const offsetRef = useRef(0);
-  if (serverNow) offsetRef.current = serverNow - Date.now();
+  const lastServerNowRef = useRef(0);
+
+  // Only calculate clock skew when a new serverNow timestamp arrives from the server.
+  // Recalculating on every render caused Date.now() to cancel out, freezing the timer!
+  if (serverNow && serverNow !== lastServerNowRef.current) {
+    lastServerNowRef.current = serverNow;
+    offsetRef.current = serverNow - Date.now();
+  }
 
   const remaining = () =>
     Math.max(0, endsAt - (Date.now() + offsetRef.current));
@@ -17,7 +24,11 @@ export function useCountdown(endsAt: number, serverNow: number) {
   useEffect(() => {
     setMs(remaining());
     if (!endsAt) return;
-    const id = setInterval(() => setMs(remaining()), 100);
+    const id = setInterval(() => {
+      const rem = remaining();
+      setMs(rem);
+      if (rem <= 0) clearInterval(id);
+    }, 100);
     return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [endsAt, serverNow]);
